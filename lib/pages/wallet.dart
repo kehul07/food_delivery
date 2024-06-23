@@ -132,31 +132,46 @@ class _WalletState extends State<Wallet> {
                   ),
                 ),
 
-                Container(
-                  padding: EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    border: Border.all(color: Color(0xFFe9e2e2)),
-                    borderRadius: BorderRadius.circular(5),
+                GestureDetector(
+                  onTap: (){
+                    makePayment("500");
+                  },
+                  child: Container(
+                    padding: EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Color(0xFFe9e2e2)),
+                      borderRadius: BorderRadius.circular(5),
+                    ),
+                    child: Text("\$"+"500",style: AppWidget.boldTextFieldStyle(),),
                   ),
-                  child: Text("\$"+"500",style: AppWidget.boldTextFieldStyle(),),
                 ),
 
-                Container(
-                  padding: EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    border: Border.all(color: Color(0xFFe9e2e2)),
-                    borderRadius: BorderRadius.circular(5),
+                GestureDetector(
+                  onTap: (){
+                    makePayment("1000");
+                  },
+                  child: Container(
+                    padding: EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Color(0xFFe9e2e2)),
+                      borderRadius: BorderRadius.circular(5),
+                    ),
+                    child: Text("\$"+"1000",style: AppWidget.boldTextFieldStyle(),),
                   ),
-                  child: Text("\$"+"1000",style: AppWidget.boldTextFieldStyle(),),
                 ),
 
-                Container(
-                  padding: EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    border: Border.all(color: Color(0xFFe9e2e2)),
-                    borderRadius: BorderRadius.circular(5),
+                GestureDetector(
+                  onTap: (){
+                    makePayment("2000");
+                  },
+                  child: Container(
+                    padding: EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Color(0xFFe9e2e2)),
+                      borderRadius: BorderRadius.circular(5),
+                    ),
+                    child: Text("\$"+"2000",style: AppWidget.boldTextFieldStyle(),),
                   ),
-                  child: Text("\$"+"2000",style: AppWidget.boldTextFieldStyle(),),
                 ),
 
               ],
