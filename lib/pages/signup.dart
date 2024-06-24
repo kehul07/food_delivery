@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:food_delivery/pages/bottom_nav.dart';
 import 'package:food_delivery/pages/login.dart';
 import 'package:food_delivery/widgets/widget_support.dart';
+import 'package:random_string/random_string.dart';
 
 class Signup extends StatefulWidget {
   const Signup({super.key});
@@ -34,7 +35,7 @@ class _SignupState extends State<Signup> {
     }
   }
 
-  Map<String,dynamic>
+
 
   @override
   void initState() {
@@ -143,6 +144,13 @@ class _SignupState extends State<Signup> {
                                       register(emailController.text,passController.text).then((value){
                                         if(value == "Register Successfully"){
                                           ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Register Successfully",style: TextStyle(color: Colors.white,fontSize: 18),),backgroundColor: Colors.green,));
+                                          String Id = randomAlphaNumeric(10);
+                                          Map<String,dynamic> addUserInfo = {
+                                            "Name" : nameController.text,
+                                            "Email":emailController.text,
+                                            "Wallet":"0",
+                                            "Id":Id,
+                                          };
                                           Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=> BottomNav()));
                                         }else{
                                           ScaffoldMessenger.of(context).showSnackBar(SnackBar(content:Text(value,style: TextStyle(color: Colors.white,fontSize: 18),),backgroundColor: Colors.red,));
