@@ -21,6 +21,7 @@ class _SignupState extends State<Signup> {
 
   final  _formKey = GlobalKey<FormState>();
 
+
   Future<String> register(String e , String p) async{
     try {
       await FirebaseAuth.instance.createUserWithEmailAndPassword(
@@ -32,6 +33,8 @@ class _SignupState extends State<Signup> {
       return ex.message.toString();
     }
   }
+
+  Map<String,dynamic>
 
   @override
   void initState() {
