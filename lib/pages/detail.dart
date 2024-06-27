@@ -1,15 +1,46 @@
 import 'package:flutter/material.dart';
+import 'package:food_delivery/services/database.dart';
+import 'package:food_delivery/services/shared_pref.dart';
 import 'package:food_delivery/widgets/widget_support.dart';
 
 class Detail extends StatefulWidget {
-  const Detail({super.key});
+  String image, name, detail, price;
+
+
+   Detail(
+      {required this.name,
+      required this.detail,
+      required this.image,
+      required this.price});
 
   @override
   State<Detail> createState() => _DetailState();
 }
 
 class _DetailState extends State<Detail> {
-  int a = 1;
+  int a = 1, total = 0;
+
+  String? id;
+
+  getUserId() async{
+    id = await SharedPref().getUserId();
+    setState(() {
+
+    });
+  }
+  ontheload() async{
+    await getUserId();
+    setState(() {
+
+    });
+  }
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    ontheload();
+    total = int.parse(widget.price);
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -23,8 +54,8 @@ class _DetailState extends State<Detail> {
                   Navigator.pop(context);
                 },
                 child: Icon(Icons.arrow_back_ios_new_outlined)),
-            Image.asset(
-              'images/salad2.png',
+            Image.network(
+              widget.image,
               width: MediaQuery.of(context).size.width,
               height: MediaQuery.of(context).size.height / 2.3,
               fit: BoxFit.fill,
@@ -38,13 +69,10 @@ class _DetailState extends State<Detail> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      "Mediterranean",
+                      widget.name,
                       style: AppWidget.semiBoldTextFieldStyle(),
                     ),
-                    Text(
-                      "Chickpea Salad",
-                      style: AppWidget.boldTextFieldStyle(),
-                    ),
+
                   ],
                 ),
                 Spacer(),
@@ -52,6 +80,7 @@ class _DetailState extends State<Detail> {
                   onTap: () {
                     if (a > 1) {
                       --a;
+                      total = total - int.parse(widget.price);
                       setState(() {});
                     }
                   },
@@ -79,6 +108,7 @@ class _DetailState extends State<Detail> {
                 GestureDetector(
                   onTap: () {
                     ++a;
+                    total = total + int.parse(widget.price);
                     setState(() {});
                   },
                   child: Container(
@@ -98,9 +128,9 @@ class _DetailState extends State<Detail> {
               height: 20,
             ),
             Text(
-              "Salad is a versatile dish typically composed of a mixture of small pieces of food, usually featuring raw or cooked vegetables, fruits, or a combination of both. Salads can be served cold or warm, and they often include additional ingredients such as grains, proteins, nuts, seeds, cheese, and dressings.",
+              widget.detail,
               style: AppWidget.LightTextFieldStyle(),
-              maxLines: 3,
+              maxLines: 5,
             ),
             SizedBox(
               height: 20,
@@ -140,24 +170,54 @@ class _DetailState extends State<Detail> {
                         "Total Price",
                         style: AppWidget.semiBoldTextFieldStyle(),
                       ),
-                      Text("\$28",style: AppWidget.semiBoldTextFieldStyle(),)
+                      Text(
+                        "\$"+total.toString(),
+                        style: AppWidget.semiBoldTextFieldStyle(),
+                      )
                     ],
                   ),
-                  Container(
-                    padding: EdgeInsets.all(15),
-                    decoration: BoxDecoration(
-                      color: Colors.red,
-                      borderRadius: BorderRadius.circular(10)
-                    ),
-                    child: Row(
-                      children: [
-                        Text("Add to cart",style: TextStyle(color: Colors.white,fontSize: 18,fontWeight: FontWeight.bold),),
-                        SizedBox(width: 20,),
-                        Container(
+                  GestureDetector(
+                    onTap: () async{
+                      Map<String,dynamic> addFoodToCart = {
+                        "Name" : widget.name,
+                        "Quantity":a.toString(),
+                        "Total":total.toString(),
+                        "Image":widget.image,
+                      };
+                      await Database().addFoodToCart(addFoodToCart,id!);
+                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                          backgroundColor: Colors.orangeAccent,
+                          content: Text(
+                            "Added to Cart",
+                            style: TextStyle(fontSize: 18.0),
+                          )));
 
-                          child: Icon(Icons.shopping_cart_outlined,color: Colors.white,),
-                        )
-                      ],
+                    },
+                    child: Container(
+                      padding: EdgeInsets.all(15),
+                      decoration: BoxDecoration(
+                          color: Colors.red,
+                          borderRadius: BorderRadius.circular(10)),
+                      child: Row(
+                        children: [
+                          Text(
+                            "Add to cart",
+                            style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold),
+                          ),
+                          SizedBox(
+                            width: 20,
+                          ),
+                          Container(
+                            child: Icon(
+                              Icons.shopping_cart_outlined,
+                              color: Colors.white,
+                            ),
+                          )
+                        ],
+                      ),
                     ),
                   )
                 ],

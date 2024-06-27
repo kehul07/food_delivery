@@ -1,11 +1,16 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:food_delivery/pages/bottom_nav.dart';
 import 'package:food_delivery/pages/login.dart';
+import 'package:food_delivery/services/database.dart';
+import 'package:food_delivery/services/shared_pref.dart';
 import 'package:food_delivery/widgets/widget_support.dart';
 import 'package:random_string/random_string.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
 
 class Signup extends StatefulWidget {
   const Signup({super.key});
@@ -20,15 +25,31 @@ class _SignupState extends State<Signup> {
   var emailController = TextEditingController();
   var passController = TextEditingController();
 
+  static String userIdKey = "USERIDKEY";
+  static String userNameKey = "USERNAMEKEY";
+  static String userEmailKey = "USEREMAILKEY";
+  static String userWalletKey = "USERWALLETKEY";
+
   final  _formKey = GlobalKey<FormState>();
 
 
   Future<String> register(String e , String p) async{
     try {
       await FirebaseAuth.instance.createUserWithEmailAndPassword(
-          email: e, password: p).then((value) {
-        print("Register Successfully");
-      });
+          email: e, password: p);
+      String Id = randomAlphaNumeric(10);
+      Map<String,dynamic> addUserInfo = {
+        "Name" : nameController.text,
+        "Email":emailController.text,
+        "Wallet":"0",
+        "Id":Id,
+      };
+      await Database().addUser(addUserInfo, Id);
+      SharedPreferences sf = await SharedPreferences.getInstance();
+      sf.setString(userIdKey, Id);
+      sf.setString(userNameKey, nameController.text);
+      sf.setString(userEmailKey, emailController.text);
+      sf.setString(userWalletKey, "0");
       return "Register Successfully";
     } on FirebaseAuthException catch (ex) {
       return ex.message.toString();
@@ -136,21 +157,14 @@ class _SignupState extends State<Signup> {
 
                               SizedBox(height: 60,),
                               GestureDetector(
-                                onTap: (){
+                                onTap: () async {
                                   if(_formKey.currentState!.validate()){
                                     name = nameController.text.toString();
                                     email = emailController.text.toString();
                                     password = passController.text.toString();
-                                      register(emailController.text,passController.text).then((value){
+                                      await register(emailController.text,passController.text).then((value) async {
                                         if(value == "Register Successfully"){
                                           ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Register Successfully",style: TextStyle(color: Colors.white,fontSize: 18),),backgroundColor: Colors.green,));
-                                          String Id = randomAlphaNumeric(10);
-                                          Map<String,dynamic> addUserInfo = {
-                                            "Name" : nameController.text,
-                                            "Email":emailController.text,
-                                            "Wallet":"0",
-                                            "Id":Id,
-                                          };
                                           Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=> BottomNav()));
                                         }else{
                                           ScaffoldMessenger.of(context).showSnackBar(SnackBar(content:Text(value,style: TextStyle(color: Colors.white,fontSize: 18),),backgroundColor: Colors.red,));

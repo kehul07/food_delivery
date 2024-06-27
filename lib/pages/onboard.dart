@@ -60,7 +60,7 @@ class _OnboardState extends State<Onboard> {
                       ),
                       Image.asset(
                         contents[i].image,
-                        height: 450,
+                        height: 400,
                         width: MediaQuery.of(context).size.width ,
                         fit: BoxFit.fill,
                       ),

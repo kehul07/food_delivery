@@ -1,6 +1,9 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:food_delivery/pages/detail.dart';
+import 'package:food_delivery/services/database.dart';
+import 'package:food_delivery/services/shared_pref.dart';
 import 'package:food_delivery/widgets/widget_support.dart';
 
 class HomePage extends StatefulWidget {
@@ -11,10 +14,24 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+
+
+  Stream? fooditemstream ;
+  String? name;
+
+  ontheload() async{
+    fooditemstream = await  Database().getItem("Ice-cream");
+    name = await SharedPref().getUserName();
+    setState(() {
+
+    });
+  }
+
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
+    ontheload();
     SystemChrome.setSystemUIOverlayStyle(
       SystemUiOverlayStyle(
         statusBarColor: Colors.red, // Change this to your desired color
@@ -23,206 +40,314 @@ class _HomePageState extends State<HomePage> {
       ),
     );
   }
-  bool icecream = false, pizza = false, salad = false, burger = false;
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: Container(
-        margin: EdgeInsets.only(top: 20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Container(
-              color: Colors.red,
-              padding: EdgeInsets.only(left: 20, top: 20, bottom: 10),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    "Hello Shivam,",
-                    style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        fontFamily: 'Poppins'),
-                  ),
-                  Container(
-                    margin: EdgeInsets.only(right: 20),
-                    padding: EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: Colors.red,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Icon(
-                      Icons.shopping_cart,
-                      color: Colors.white,
-                    ),
-                  )
-                ],
+  bool icecream = true, pizza = false, salad = false, burger = false;
+
+
+  Widget allitem()  {
+    return StreamBuilder(stream: fooditemstream, builder: (context,AsyncSnapshot snapshot){
+      return snapshot.hasData ? ListView.builder(
+        padding: EdgeInsets.only(left: 10),
+          itemCount: snapshot.data.docs.length,
+          shrinkWrap: true,
+          scrollDirection: Axis.horizontal,
+          itemBuilder: (context,index){
+          DocumentSnapshot ds = snapshot.data.docs[index];
+          return GestureDetector(
+            onTap: () {
+              Navigator.push(context,
+                  MaterialPageRoute(builder: (context) => Detail(name: ds["Name"],detail: ds["Detail"],image: ds["Image"],price: ds["Price"],)));
+            },
+            child: Container(
+              margin: EdgeInsets.all(8),
+              child: Material(
+                elevation: 6,
+                borderRadius: BorderRadius.circular(16),
+                child: Container(
+                  padding: EdgeInsets.all(12),
+                  child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(30),
+                          child: Image.network(
+                            ds["Image"],
+                            height: 150,
+                            width: 150,
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+                        Text(
+                          ds["Name"],
+                          style: AppWidget.semiBoldTextFieldStyle(),
+                        ),
+                        SizedBox(
+                          height: 5,
+                        ),
+                        Text(
+                          "Fresh and Healthy",
+                          style: AppWidget.LightTextFieldStyle(),
+                        ),
+                        SizedBox(
+                          height: 5,
+                        ),
+                        Text(
+                          "\$"+ds["Price"],
+                          style: AppWidget.semiBoldTextFieldStyle(),
+                        )
+                      ]),
+                ),
               ),
             ),
-            SizedBox(
-              height: 20,
-            ),
-            Container(
-              padding: EdgeInsets.only(left: 20),
-                child: Text("Delicious Food",
-                    style: AppWidget.HeadlineTextFieldStyle())),
-            Container(
-              padding: EdgeInsets.only(left: 20),
-              child: Text("Discover and Get Great Food",
-                  style: AppWidget.LightTextFieldStyle()),
-            ),
-            SizedBox(
-              height: 20,
-            ),
-            Container(
-                margin: EdgeInsets.only(right: 20, left: 20),
-                child: showItemCategory()),
-            SizedBox(
-              height: 20,
-            ),
-            SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              padding: EdgeInsets.only(left: 20),
-              child: Row(
-                children: [
-                  GestureDetector(
-                    onTap: () {
-                      Navigator.push(context,
-                          MaterialPageRoute(builder: (context) => Detail()));
-                    },
-                    child: Container(
-                      margin: EdgeInsets.all(8),
-                      child: Material(
-                        elevation: 6,
-                        borderRadius: BorderRadius.circular(16),
-                        child: Container(
-                          padding: EdgeInsets.all(12),
+          );
+      }) : Center(child: Container(
+        width: 30,
+          height:30 ,
+          child: CircularProgressIndicator()));
+    });
+  }
+
+
+  // Widget allitemVertically()  {
+  //   return StreamBuilder(stream: fooditemstream, builder: (context,AsyncSnapshot snapshot){
+  //     return snapshot.hasData ? ListView.builder(
+  //         padding: EdgeInsets.zero,
+  //         itemCount: snapshot.data.docs.length,
+  //         shrinkWrap: true,
+  //         scrollDirection: Axis.vertical,
+  //         itemBuilder: (context,index){
+  //           DocumentSnapshot ds = snapshot.data.docs[index];
+  //           return GestureDetector(
+  //             onTap: () {
+  //               Navigator.push(context,
+  //                   MaterialPageRoute(builder: (context) => Detail(name: ds["Name"],detail: ds["Detail"],image: ds["Image"],price: ds["Price"],)));
+  //             },
+  //             child: Container(
+  //               margin: EdgeInsets.only(right: 20, left: 20,bottom: 20),
+  //               child: Material(
+  //                 borderRadius: BorderRadius.circular(20),
+  //                 elevation: 5,
+  //                 child: Container(
+  //                   padding: EdgeInsets.all(10),
+  //                   child: Row(
+  //                     crossAxisAlignment: CrossAxisAlignment.start,
+  //                     children: [
+  //                       ClipRRect(
+  //                         borderRadius: BorderRadius.circular(30),
+  //                         child: Image.network(
+  //                           ds["Image"],
+  //                           height: 120,
+  //                           width: 120,
+  //                           fit: BoxFit.cover,
+  //                         ),
+  //                       ),
+  //                       SizedBox(
+  //                         width: 20,
+  //                       ),
+  //                       Column(
+  //                         children: [
+  //                           Container(
+  //                             width: MediaQuery.of(context).size.width / 2,
+  //                             child: Text(
+  //                               ds["Name"],
+  //                               style: AppWidget.semiBoldTextFieldStyle(),
+  //                             ),
+  //                           ),
+  //                           Container(
+  //                             width: MediaQuery.of(context).size.width / 2,
+  //                             child: Text(
+  //                               "Honey goot chees",
+  //                               style: AppWidget.LightTextFieldStyle(),
+  //                             ),
+  //                           ),
+  //                           Container(
+  //                             width: MediaQuery.of(context).size.width / 2,
+  //                             child: Text(
+  //                               "\$"+ds["Price"],
+  //                               style: AppWidget.semiBoldTextFieldStyle(),
+  //                             ),
+  //                           ),
+  //                         ],
+  //                       )
+  //                     ],
+  //                   ),
+  //                 ),
+  //               ),
+  //             )
+  //           );
+  //         }) : CircularProgressIndicator();
+  //   });
+  // }
+
+  Widget allitemVertically() {
+    return StreamBuilder(
+      stream: fooditemstream,
+      builder: (context, AsyncSnapshot snapshot) {
+        if (!snapshot.hasData) {
+          return Center(child: Container(
+              width: 30,
+              height:30 ,
+              child: CircularProgressIndicator()));
+        }
+        return Column(
+          children: List.generate(snapshot.data.docs.length, (index) {
+            DocumentSnapshot ds = snapshot.data.docs[index];
+            return GestureDetector(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => Detail(
+                      name: ds["Name"],
+                      detail: ds["Detail"],
+                      image: ds["Image"],
+                      price: ds["Price"],
+                    ),
+                  ),
+                );
+              },
+              child: Container(
+                margin: EdgeInsets.only(right: 20, left: 20, bottom: 20),
+                child: Material(
+                  borderRadius: BorderRadius.circular(20),
+                  elevation: 5,
+                  child: Container(
+                    padding: EdgeInsets.all(10),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(30),
+                          child: Image.network(
+                            ds["Image"],
+                            height: 120,
+                            width: 120,
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+                        SizedBox(
+                          width: 20,
+                        ),
+                        Expanded(
                           child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Image.asset(
-                                  'images/salad2.png',
-                                  height: 150,
-                                  width: 150,
-                                ),
-                                Text(
-                                  "Veggie Taco Hash",
+                            children: [
+                              Container(
+                                width: MediaQuery.of(context).size.width / 2,
+                                child: Text(
+                                  ds["Name"],
                                   style: AppWidget.semiBoldTextFieldStyle(),
                                 ),
-                                SizedBox(
-                                  height: 5,
-                                ),
-                                Text(
-                                  "Fresh and Healthy",
+                              ),
+                              Container(
+                                width: MediaQuery.of(context).size.width / 2,
+                                child: Text(
+                                  "Honey goot chees",
                                   style: AppWidget.LightTextFieldStyle(),
                                 ),
-                                SizedBox(
-                                  height: 5,
-                                ),
-                                Text(
-                                  "\$25",
+                              ),
+                              Container(
+                                width: MediaQuery.of(context).size.width / 2,
+                                child: Text(
+                                  "\$" + ds["Price"],
                                   style: AppWidget.semiBoldTextFieldStyle(),
-                                )
-                              ]),
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
+                      ],
                     ),
-                  ),
-                  Container(
-                    margin: EdgeInsets.all(8),
-                    child: Material(
-                      elevation: 6,
-                      borderRadius: BorderRadius.circular(16),
-                      child: Container(
-                        padding: EdgeInsets.all(12),
-                        child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Image.asset(
-                                'images/salad2.png',
-                                height: 150,
-                                width: 150,
-                              ),
-                              Text(
-                                "Mix Veg Salad",
-                                style: AppWidget.semiBoldTextFieldStyle(),
-                              ),
-                              SizedBox(
-                                height: 5,
-                              ),
-                              Text(
-                                "Spicy with Onion",
-                                style: AppWidget.LightTextFieldStyle(),
-                              ),
-                              SizedBox(
-                                height: 5,
-                              ),
-                              Text(
-                                "\$25",
-                                style: AppWidget.semiBoldTextFieldStyle(),
-                              )
-                            ]),
-                      ),
-                    ),
-                  )
-                ],
-              ),
-            ),
-            SizedBox(
-              height: 30,
-            ),
-            Container(
-              margin: EdgeInsets.only(right: 20, left: 20),
-              child: Material(
-                borderRadius: BorderRadius.circular(20),
-                elevation: 5,
-                child: Container(
-                  padding: EdgeInsets.all(10),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Image.asset(
-                        'images/salad2.png',
-                        height: 120,
-                        width: 120,
-                        fit: BoxFit.cover,
-                      ),
-                      SizedBox(
-                        width: 20,
-                      ),
-                      Column(
-                        children: [
-                          Container(
-                            width: MediaQuery.of(context).size.width / 2,
-                            child: Text(
-                              "Mediterranean Chickpea Salad",
-                              style: AppWidget.semiBoldTextFieldStyle(),
-                            ),
-                          ),
-                          Container(
-                            width: MediaQuery.of(context).size.width / 2,
-                            child: Text(
-                              "Honey goot chees",
-                              style: AppWidget.LightTextFieldStyle(),
-                            ),
-                          ),
-                          Container(
-                            width: MediaQuery.of(context).size.width / 2,
-                            child: Text(
-                              "\$25",
-                              style: AppWidget.semiBoldTextFieldStyle(),
-                            ),
-                          ),
-                        ],
-                      )
-                    ],
                   ),
                 ),
               ),
-            )
-          ],
+            );
+          }),
+        );
+      },
+    );
+  }
+
+
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: SingleChildScrollView(
+        child: Container(
+          margin: EdgeInsets.only(top: 20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                color: Colors.red,
+                padding: EdgeInsets.only(left: 20, top: 20, bottom: 10),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    name==null? Text(
+                      "Hello ",
+                      style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          fontFamily: 'Poppins'),
+                    ):
+                    Text(
+                      "Hello "+name!+",",
+                      style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          fontFamily: 'Poppins'),
+                    ),
+                    GestureDetector(
+                      onTap: (){
+                      },
+                      child: Container(
+                        margin: EdgeInsets.only(right: 20),
+                        padding: EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: Colors.red,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Icon(
+                          Icons.shopping_cart,
+                          color: Colors.white,
+                        ),
+                      ),
+                    )
+                  ],
+                ),
+              ),
+              SizedBox(
+                height: 20,
+              ),
+              Container(
+                padding: EdgeInsets.only(left: 20),
+                  child: Text("Delicious Food",
+                      style: AppWidget.HeadlineTextFieldStyle())),
+              Container(
+                padding: EdgeInsets.only(left: 20),
+                child: Text("Discover and Get Great Food",
+                    style: AppWidget.LightTextFieldStyle()),
+              ),
+              SizedBox(
+                height: 20,
+              ),
+              Container(
+                  margin: EdgeInsets.only(right: 20, left: 20),
+                  child: showItemCategory()),
+              SizedBox(
+                height: 20,
+              ),
+              Container(
+                height: 280,
+                  child: allitem()),
+              SizedBox(
+                height: 30,
+              ),
+              allitemVertically(),
+            ],
+          ),
         ),
       ),
     );
@@ -233,11 +358,12 @@ class _HomePageState extends State<HomePage> {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         GestureDetector(
-          onTap: () {
+          onTap: () async{
             icecream = true;
             pizza = false;
             salad = false;
             burger = false;
+            fooditemstream = await  Database().getItem("Ice-cream");
             setState(() {});
           },
           child: Material(
@@ -259,11 +385,13 @@ class _HomePageState extends State<HomePage> {
           ),
         ),
         GestureDetector(
-          onTap: () {
+          onTap: () async{
             icecream = false;
             pizza = true;
             salad = false;
             burger = false;
+            fooditemstream = await  Database().getItem("Pizza");
+
             setState(() {});
           },
           child: Material(
@@ -285,11 +413,13 @@ class _HomePageState extends State<HomePage> {
           ),
         ),
         GestureDetector(
-          onTap: () {
+          onTap: () async{
             icecream = false;
             pizza = false;
             salad = true;
             burger = false;
+            fooditemstream = await  Database().getItem("Salad");
+
             setState(() {});
           },
           child: Material(
@@ -311,11 +441,13 @@ class _HomePageState extends State<HomePage> {
           ),
         ),
         GestureDetector(
-          onTap: () {
+          onTap: () async{
             icecream = false;
             pizza = false;
             salad = false;
             burger = true;
+            fooditemstream = await  Database().getItem("Burger");
+
             setState(() {});
           },
           child: Material(
